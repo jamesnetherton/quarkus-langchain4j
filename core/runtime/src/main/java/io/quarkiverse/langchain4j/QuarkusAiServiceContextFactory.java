@@ -2,6 +2,7 @@ package io.quarkiverse.langchain4j;
 
 import dev.langchain4j.service.AiServiceContext;
 import dev.langchain4j.spi.services.AiServiceContextFactory;
+import io.quarkiverse.langchain4j.runtime.aiservice.AiServiceContextProvider;
 import io.quarkiverse.langchain4j.runtime.aiservice.QuarkusAiServiceContext;
 import io.quarkiverse.langchain4j.runtime.aiservice.QuarkusAiServiceContextQualifier;
 import io.quarkus.arc.Arc;
@@ -11,6 +12,15 @@ public class QuarkusAiServiceContextFactory implements AiServiceContextFactory {
 
     @Override
     public AiServiceContext create(Class<?> aiServiceClass) {
+        for (InstanceHandle<AiServiceContextProvider> contextProviderHandler : Arc.container()
+                .listAll(AiServiceContextProvider.class)) {
+            if (contextProviderHandler.isAvailable()) {
+                AiServiceContextProvider provider = contextProviderHandler.get();
+                if (provider.handles(aiServiceClass.getName())) {
+                    return provider.create(aiServiceClass);
+                }
+            }
+        }
         InstanceHandle<QuarkusAiServiceContext> instance = Arc.container().instance(QuarkusAiServiceContext.class,
                 QuarkusAiServiceContextQualifier.Literal.of(
                         aiServiceClass.getName()));

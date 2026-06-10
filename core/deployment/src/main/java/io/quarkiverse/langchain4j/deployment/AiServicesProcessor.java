@@ -112,6 +112,7 @@ import io.quarkiverse.langchain4j.runtime.QuarkusServiceOutputParser;
 import io.quarkiverse.langchain4j.runtime.RequestScopeStateDefaultMemoryIdProvider;
 import io.quarkiverse.langchain4j.runtime.ResponseSchemaUtil;
 import io.quarkiverse.langchain4j.runtime.aiservice.AiServiceClassCreateInfo;
+import io.quarkiverse.langchain4j.runtime.aiservice.AiServiceContextProvider;
 import io.quarkiverse.langchain4j.runtime.aiservice.AiServiceMethodCreateInfo;
 import io.quarkiverse.langchain4j.runtime.aiservice.AiServiceMethodCreateInfo.ResponseSchemaInfo;
 import io.quarkiverse.langchain4j.runtime.aiservice.AiServiceMethodImplementationSupport;
@@ -226,6 +227,11 @@ public class AiServicesProcessor {
 
     private static final Set<DotName> GUARDRAIL_ANNOTATIONS = Set.of(
             TOOL_INPUT_GUARDRAIL, TOOL_INPUT_GUARDRAILS, TOOL_OUTPUT_GUARDRAIL, TOOL_OUTPUT_GUARDRAILS);
+
+    @BuildStep
+    UnremovableBeanBuildItem markAiServiceContextProvidersAsUnremovable() {
+        return UnremovableBeanBuildItem.beanTypes(AiServiceContextProvider.class);
+    }
 
     @BuildStep
     public void nativeSupport(CombinedIndexBuildItem indexBuildItem,
